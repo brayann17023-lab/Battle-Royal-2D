@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BATTLE ROYALE 2D</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<!-- HUD de partida -->
+<div id="hud" class="hide">
+  <div id="topbar"><span id="alive"></span><span id="kills"></span><span id="zname"></span></div>
+  <div id="zinfo"></div>
+  <div id="feed"></div>
+  <div id="board"></div>
+  <canvas id="mini" width="160" height="160"></canvas>
+  <div id="bars"><div class="bar hp"><i id="hpf"></i><b id="hpt"></b></div><div class="bar ar"><i id="arf"></i></div></div>
+  <div id="wbox"><div id="wname"></div><div id="wammo"></div><div id="wextra"></div></div>
+  <div id="prompt"></div><div id="banner"></div><div id="warn"></div><div id="fps"></div>
+</div>
+
+<!-- Menú principal -->
+<div id="menu" class="screen">
+  <div class="col main">
+    <h1>BATTLE<br>ROYALE <em>2D</em></h1>
+    <label for="pname">Tu nombre</label>
+    <input id="pname" maxlength="14" placeholder="Jugador" autocomplete="off">
+    <button id="bPlay" class="btn big">JUGAR</button>
+    <button id="bCreate" class="btn">CREAR SALA</button>
+    <button id="bJoin" class="btn">UNIRSE A SALA</button>
+    <button id="bChars" class="btn">PERSONALIZAR</button>
+    <button id="bCfg" class="btn">CONFIGURACIÓN</button>
+    <div id="msg" role="status"></div>
+  </div>
+  <div class="col side">
+    <h3>Amigos</h3>
+    <div class="row"><input id="fname" maxlength="14" placeholder="Nombre de tu amigo"><button id="fadd" class="btn sm">Añadir</button></div>
+    <div id="flist"></div>
+    <p class="hint">Un amigo aparece "En línea" cuando tiene el juego abierto con ese nombre. Si está en una sala, puedes unirte con un clic.</p>
+  </div>
+</div>
+
+<!-- Crear sala -->
+<div id="create" class="screen modal">
+  <div class="panel">
+    <h2>Crear sala privada</h2>
+    <div id="modes" class="modes"></div>
+    <div class="row end"><button class="btn ghost" data-back>Cancelar</button><button id="bCreateGo" class="btn">Crear sala</button></div>
+  </div>
+</div>
+
+<!-- Unirse -->
+<div id="join" class="screen modal">
+  <div class="panel narrow">
+    <h2>Unirse a una sala</h2>
+    <input id="jcode" maxlength="5" placeholder="CÓDIGO" autocomplete="off" class="code">
+    <div id="jerr" class="err"></div>
+    <div class="row end"><button class="btn ghost" data-back>Cancelar</button><button id="bJoinGo" class="btn">Unirse</button></div>
+  </div>
+</div>
+
+<!-- Personalizar -->
+<div id="chars" class="screen modal">
+  <div class="panel wide">
+    <h2>Elige tu personaje</h2>
+    <div id="cgrid" class="cgrid"></div>
+    <div class="row end"><button class="btn" data-back>Listo</button></div>
+  </div>
+</div>
+
+<!-- Configuración -->
+<div id="settings" class="screen modal">
+  <div class="panel narrow">
+    <h2>Configuración</h2>
+    <label>Calidad gráfica</label>
+    <select id="sq"><option value="0">Baja (PC modestas)</option><option value="1">Media</option><option value="2">Alta</option></select>
+    <label>Límite de FPS</label>
+    <select id="sfps"><option value="30">30 FPS</option><option value="60">60 FPS</option></select>
+    <label>Volumen</label>
+    <input id="svol" type="range" min="0" max="100">
+    <label class="chk"><input id="sshow" type="checkbox"> Mostrar FPS</label>
+    <div class="row end"><button class="btn" data-back>Cerrar</button></div>
+  </div>
+</div>
+
+<!-- Sala de espera -->
+<div id="lobby" class="screen">
+  <div class="panel wide">
+    <div class="lhead">
+      <div><div class="small">Código de sala</div><div id="lcode" class="bigcode"></div></div>
+      <button id="bCopy" class="btn sm">Copiar código</button>
+      <div class="grow"></div>
+      <div id="lcount" class="count"></div>
+    </div>
+    <div id="lmode"></div>
+    <div id="lplayers" class="plist"></div>
+    <div id="ltimer" class="hint"></div>
+    <div class="row end"><button id="bLeave" class="btn ghost">Salir</button><button id="bStart" class="btn big">COMENZAR PARTIDA</button></div>
+  </div>
+</div>
+
+<!-- Inventario (TAB) -->
+<div id="inv" class="screen modal hide">
+  <div class="panel narrow">
+    <h2>Inventario</h2>
+    <div id="invbody"></div>
+    <p class="hint">Clic en un arma para equiparla. TAB para cerrar.</p>
+  </div>
+</div>
+
+<!-- Pausa (ESC) -->
+<div id="pause" class="screen modal hide">
+  <div class="panel narrow">
+    <h2>Menú</h2>
+    <button id="bResume" class="btn big">Continuar</button>
+    <button id="bPCfg" class="btn">Configuración</button>
+    <button id="bQuit" class="btn ghost">Abandonar partida</button>
+    <p class="hint">La partida sigue en curso mientras el menú está abierto.</p>
+  </div>
+</div>
+
+<!-- Resultados -->
+<div id="results" class="screen modal hide">
+  <div class="panel wide">
+    <h2 id="rtitle"></h2>
+    <div id="rsub" class="hint"></div>
+    <div id="rtable"></div>
+    <div class="row end"><button id="bRMenu" class="btn ghost">Menú principal</button><button id="bRLobby" class="btn">Volver a la sala</button></div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="weapons.js"></script>
+<script src="map.js"></script>
+<script src="player.js"></script>
+<script src="inventory.js"></script>
+<script src="network.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
